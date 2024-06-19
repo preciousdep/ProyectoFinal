@@ -33,3 +33,8 @@ class Enfermedad:
         
     def contador_enfermo(self):
         self.__contador += 1
+
+    # draft de si la persona tras estar enferma se recupera o muere
+    # considerar: recupera, inmune. muere, eliminar?? vacuna, posibilidad 100%
+
+    def viveomuere(self):
