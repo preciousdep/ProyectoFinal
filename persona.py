@@ -2,12 +2,11 @@ from enfermedad import Enfermedad
 # aqui se usan atributos de: enfermo, contador, tiempo_infectado
 
 class Persona():
-    def __init__(self):
-        self.__comunidad = int
-        self.__id = int
-        self.__nombre = ''
-        self.__apellido = ''
-        self.__enfermedad = []
+    def __init__(self,identidad, nombre,apellido):
+        self.__id = identidad
+        self.__nombre = nombre
+        self.__apellido = apellido
+        self.__contagiado = False
         
     # metodos get y set para cada atributo. se van a editar conforme lo necesario
 
@@ -23,25 +22,17 @@ class Persona():
 
     def get_apellido(self):
         return self.__apellido
-
-    def get_enfermedad(self):
-        return self.__enfermedad
+    
+    def get_contagiado(self):
+        return self.__contagiado
 
     ######################
     def set_comunidad(self, comunidad):
         self.__comunidad = comunidad
 
-    def set_id(self, ident):
-        self.__id = ident
-
-    def set_nombre(self, nombre):
-        self.__nombre = nombre
-
-    def set_apellido(self, apellido):
-        self.__apellido = apellido
-
-    def set_enfermedad(self, enfermedad):
-        self.__enfermedad = enfermedad
+    # valor es un bool
+    def set_contagiado(self,valor):
+        self.__contagiado = valor
 
 
     
