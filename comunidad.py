@@ -7,18 +7,19 @@ class Comunidad:
         self.ciudadanos = []
         self.num_ciudadanos = int
         self.num_contagiados = int
-        self.__enfermedades = []
+        self.__enfermedad = None
+        # personas que conoce en promedio
         self.__promedio_fisico = int
-        self.__probabilidad_contacto_estrecho = float
+        self.__probabilidad_contacto_estrecho = int
 
     def add_enfermedad(self, enfermedad):
         if isinstance(enfermedad, Enfermedad):
-            self.__enfermedades.append(enfermedad)
+            self.__enfermedad = enfermedad 
         else:
             pass
 
     def get_enfermedad(self):
-        return self.__enfermedades
+        return self.__enfermedad
 
     def get_promedio_fisico(self):
         return self.__promedio_fisico
@@ -37,12 +38,17 @@ class Comunidad:
     def contacto_estrecho(self, persona1, persona2,enfermedad):
         if isinstance(persona1, Persona) and isinstance(persona2,Persona):
             if persona1.get_apellido() == persona2.get_apellido():
+                # probabilidad mas alta al ser familia
                 return enfermedad.infeccion()
             else:
+                # aqui los de promedio de conocidos
                 pass
 
     def set_promedio_contacto_fisico(self):
-        self.__promedio_fisico = random.randint()
+        self.__promedio_fisico = random.randint(0,10)
+
+    def set_probabilidad_contacto_estrecho(self):
+        self.__probabilidad_contacto_estrecho = random.randint(0,100)
             
     def agregar_persona_comunidad(self,persona):
         if isinstance(persona,Persona):
