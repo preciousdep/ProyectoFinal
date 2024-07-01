@@ -5,8 +5,8 @@ import random
 class Comunidad:
     def __init__(self):
         self.ciudadanos = []
-        self.num_ciudadanos = int
-        self.num_contagiados = int
+        self.num_ciudadanos = 0
+        self.num_contagiados = 0
         self.__enfermedad = None
         # personas que conoce en promedio
         self.__promedio_fisico = int
@@ -24,8 +24,8 @@ class Comunidad:
     def get_promedio_fisico(self):
         return self.__promedio_fisico
 
-    def get_probabilidad_contacto_fisico(self):
-        return self.__probabilidad_contacto_fisico
+    def get_probabilidad_contacto_estrecho(self):
+        return self.__probabilidad_contacto_estrecho
 
     def set_num_ciudadanos(self,numero):
         self.num_ciudadanos = numero
@@ -44,9 +44,15 @@ class Comunidad:
                 # aqui los de promedio de conocidos
                 pass
 
+# se refiere al promedio de 'conocidos' o 'amigos'
+# que tiene una persona. se considerara un
+# +- 1 personas para ese caso
     def set_promedio_contacto_fisico(self):
         self.__promedio_fisico = random.randint(0,10)
 
+# que un contacto fisico cualquiera con un conocido o amigo
+# sea estrecho y posibilita un contagio. de lo contrario,
+# la posibilidad de un contagio sera menor o nula (draft)
     def set_probabilidad_contacto_estrecho(self):
         self.__probabilidad_contacto_estrecho = random.randint(0,100)
             
@@ -56,3 +62,5 @@ class Comunidad:
 
     def retorno_lista_comunidad(self):
         return self.ciudadanos
+
+    def persona_muere(self, persona):
