@@ -1,4 +1,4 @@
-from enfermedad import Enfermedad
+# from enfermedad import Enfermedad
 # aqui se usan atributos de: enfermo, contador, tiempo_infectado
 
 class Persona:
@@ -9,8 +9,7 @@ class Persona:
         self.__contagiado = False
         self.__estado_sir = 0
         # 0  significa susceptible, 1 significa infectado y 2 recuperado
-        self.__dias_enfermo = 0
-        
+        self.__dias_enfermo = 0       
 
     ###############################
     def get_comunidad(self):
@@ -30,6 +29,7 @@ class Persona:
 
     def get_sir(self):
         return self.__estado_sir
+
     def get_dias_enfermo(self):
         return self.__dias_enfermo
 
@@ -49,7 +49,4 @@ class Persona:
     #################
     def contar_dias_enfermo(self):
         self.__dias_enfermo += 1
-
-
-
     

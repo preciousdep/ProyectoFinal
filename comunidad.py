@@ -48,13 +48,13 @@ class Comunidad:
 # que tiene una persona. se considerara un
 # +- 1 personas para ese caso
     def set_promedio_contacto_fisico(self):
-        self.__promedio_fisico = random.randint(0,10)
+        self.__promedio_fisico = random.randint(2,10)
 
 # que un contacto fisico cualquiera con un conocido o amigo
 # sea estrecho y posibilita un contagio. de lo contrario,
 # la posibilidad de un contagio sera menor o nula (draft)
     def set_probabilidad_contacto_estrecho(self):
-        self.__probabilidad_contacto_estrecho = random.randint(0,100)
+        self.__probabilidad_contacto_estrecho = random.randint(10,60)
             
     def agregar_persona_comunidad(self,persona):
         if isinstance(persona,Persona):
@@ -64,3 +64,7 @@ class Comunidad:
         return self.ciudadanos
 
     def persona_muere(self, persona):
+        self.ciudadanos.remove(persona)
+        # revisar pq la lista se mantiene del mismo tamano
+
+

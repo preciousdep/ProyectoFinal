@@ -3,7 +3,6 @@ from comunidad import Comunidad
 from enfermedad import Enfermedad
 import random
 import pandas as pd
-import numpy as np #probando
 
     # prueba de simulador para interactuar con las clases
     # draft crea una comunidad para controlar el manejo del contagio
@@ -56,9 +55,19 @@ Probabilidad de que un contacto fisico no familiar sea estrecho: {comunidad.get_
         comunidad.agregar_persona_comunidad(ciudadano)
     return comunidad
 
+
 def crear_enfermedad():
-        enfermedad = Enfermedad("influenza",20,15)
+        #predeterminados para probar
+        enfermedad = Enfermedad("influenza",20,4)
         return enfermedad
+
+def muereono(comunidad):
+    for i in comunidad.retorno_lista_comunidad():
+        if i.get_contagiado() == True :
+            a = random.randint(0,100)
+            if a <= 2:
+                comunidad.persona_muere(i)
+                print(f"{i.get_id()}. {i.get_nombre()} {i.get_apellido()} ha muerto...")
             
 def contar_contagiados_comunidad(comunidad):
     contador_contagiados = 0
@@ -67,8 +76,7 @@ def contar_contagiados_comunidad(comunidad):
         if i.get_contagiado():
             contador_contagiados += 1
             print(i.get_id(), i.get_nombre(), i.get_apellido(), "presenta la enfermedad")
-
-    print(contador_contagiados, "contagios iniciales de", len(lista_ciudadanos_comunidad))
+    return contador_contagiados
 
 def contar_dias_curarse(comunidad,contador):
     lista_ciudadanos_comunidad = comunidad.retorno_lista_comunidad()
@@ -80,22 +88,29 @@ def contar_dias_curarse(comunidad,contador):
             i.contar_dias_enfermo()
         
         if i.get_dias_enfermo() == dias_max:
-            vive_o_muere = random.randint(0,100)
-            if vive_o_muere >= 20:
+            recuperado = random.randint(0,100)
+            if recuperado >= 20:
                 i.set_contagiado(False)
                 i.set_sir(2)
                 print(f"{i.get_nombre()} {i.get_apellido()} se ha recuperado")
-            else:
-                print(f"{i.get_nombre()} {i.get_apellido()} ha muerto...")
-                i.set_contagiado(False)
-                
-                #draft, falta el mecanismo de muerte
-                #update: que ocurra dentro de la enfermedad??
 
         if i.get_sir() == 2:
             contador_recuperados += 1
 
-#def contagio(comunidad):
+# mecanismo de contagio random draft
+def contagio(comunidad,enfermedad):
+    lista = comunidad.retorno_lista_comunidad()
+    for i in lista:
+        contactos_dia = random.randint(comunidad.get_promedio_fisico()-1, comunidad.get_promedio_fisico()+1)
+        if i.get_contagiado() == True:
+            estrecho = comunidad.get_probabilidad_contacto_estrecho()
+            for i in range(0,contactos_dia):
+                persona_x = random.randint(0,len(lista)-1)
+                decidir_contagio = random.randint(0,100)
+                if decidir_contagio < estrecho:
+                    valor = enfermedad.infeccion()
+                    comunidad.retorno_lista_comunidad()[persona_x].set_contagiado(valor)
+
 
 #def guarda_en_archivo(): #overwrite o agregar linea?
 
@@ -108,10 +123,13 @@ def dias():
     contador_dias = 0
     while pasandias:
         contador_dias += 1
-        contar_contagiados_comunidad(comunidad)
+        contagios = contar_contagiados_comunidad(comunidad)
         contar_dias_curarse(comunidad,contador_dias)
         print(f"Dia {contador_dias}")
+        contagio(comunidad,enfermedad)
+        print(f"{contagios} casos activos de {len(comunidad.retorno_lista_comunidad())}")
+        # las personas de la comunidad disminuyen constantemente
+        muereono(comunidad)
         input()
 
 dias()
-    # falta revisar numpy
