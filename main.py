@@ -9,6 +9,7 @@ class MainWindow(Gtk.Window):
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
         
+        
 
 # clase aplicacion
 
@@ -30,9 +31,9 @@ class App(Gtk.Application):
 
 
 if __name__ == "__main__":
-    app = App()
-    app.run()
     simulador = Simulador()
     simulador.dias()
+    #app = App()
+    #app.run()
 
 

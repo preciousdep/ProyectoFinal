@@ -13,7 +13,17 @@ class Simulador:
     def __init__(self):
         #asegurarse que no hayan familias de mas de 3 personas
         self.comunidad = Comunidad()
-        self.enfermedad = Enfermedad("influenza",20,4)
+        self.enfermedad = Enfermedad("influenza",20,6)
+        self.contador_recuperados = 0
+        self.contador_muertos = 0
+        self.contador_susceptibles = 0 
+        self.contador_contagiados = 0
+
+    def get_contagiados(self):
+        return self.contador_contagiados
+    
+    def get_recuperados(self):
+        return self.contador_recuperados
 
     def check_apellido(self,apellido):
         lista_ciudadanos_comunidad = self.comunidad.retorno_lista_comunidad()
@@ -64,22 +74,35 @@ class Simulador:
                 a = random.randint(0,100)
                 if a <= 2:
                     self.comunidad.persona_muere(i)
-                    print(f"{i.get_id()}. {i.get_nombre()} {i.get_apellido()} ha muerto...")
+                    self.contador_muertos += 1
                 
     def contar_contagiados_comunidad(self):
-        contador_contagiados = 0
+        contagios = 0
+        susceptibles = 0
+        recuperados = 0
         lista_ciudadanos_comunidad = self.comunidad.retorno_lista_comunidad()
         for i in lista_ciudadanos_comunidad:
-            if i.get_contagiado():
-                contador_contagiados += 1
-                print(i.get_id(), i.get_nombre(), i.get_apellido(), "presenta la enfermedad")
-        return contador_contagiados
+            if i.get_sir() == 1:
+                contagios += 1
+            elif i.get_sir() == 2:
+                recuperados += 1
+            elif i.get_sir() == 0:
+                susceptibles += 1
+        # aqui se guardan la cantidad de personas pertenecientes a cada grupo
+        # y eso se reinicia a diario
+        self.contador_susceptibles = susceptibles
+        self.contador_contagiados = contagios
+        self.contador_recuperados = recuperados
+
+
 
     def contar_dias_curarse(self,contador):
+        # cuenta los dias que lleva la persona
+        # si el estado de contagio es True
         lista_ciudadanos_comunidad = self.comunidad.retorno_lista_comunidad()
         enfermedad = self.comunidad.get_enfermedad()
         dias_max = enfermedad.get_tiempo_infectado()
-        contador_recuperados = 0
+        self.contador_recuperados = 0
         for i in lista_ciudadanos_comunidad:
             if i.get_contagiado() == True:
                 i.contar_dias_enfermo()
@@ -89,25 +112,34 @@ class Simulador:
                 if recuperado >= 20:
                     i.set_contagiado(False)
                     i.set_sir(2)
-                    print(f"{i.get_nombre()} {i.get_apellido()} se ha recuperado")
-
-            if i.get_sir() == 2:
-                contador_recuperados += 1
 
     # mecanismo de contagio random draft
     def contagio(self):
         lista = self.comunidad.retorno_lista_comunidad()
+        # pasa por la lista y evalua los contactos de cada
+        # persona uno por uno
         for i in lista:
-            contactos_dia = random.randint(self.comunidad.get_promedio_fisico()-1, self.comunidad.get_promedio_fisico()+1)
+            contactos_dia = random.randint(self.comunidad.get_promedio_fisico()-1, 
+                            self.comunidad.get_promedio_fisico()+1)
+            # si contagiado es ver
             if i.get_contagiado() == True:
                 estrecho = self.comunidad.get_probabilidad_contacto_estrecho()
-                for i in range(0,contactos_dia):
+                for j in range(0,contactos_dia):
                     persona_x = random.randint(0,len(lista)-1)
                     decidir_contagio = random.randint(0,100)
-                    if decidir_contagio < estrecho:
-                        valor = self.enfermedad.infeccion()
-                        self.comunidad.retorno_lista_comunidad()[persona_x].set_contagiado(valor)
+                    persona2 = self.comunidad.retorno_lista_comunidad()[persona_x]
+                    if persona2.get_sir() == 0 and persona2.get_contagiado() == False:
+                        # contacto fisico a estrecho
+                        if decidir_contagio < estrecho:
+                            valor = self.enfermedad.infeccion()
+                            self.comunidad.retorno_lista_comunidad()[persona_x].set_contagiado(valor)
+                            self.comunidad.retorno_lista_comunidad()[persona_x].set_sir(1)
 
+                        # contacto familiar 100% estrecho
+                        elif i.get_apellido() == persona2.get_apellido():
+                            valor = self.enfermedad.infeccion()
+                            self.comunidad.retorno_lista_comunidad()[persona_x].set_contagiado(valor)
+                            self.comunidad.retorno_lista_comunidad()[persona_x].set_sir(1)
 
     #def guarda_en_archivo(): #overwrite o agregar linea?
 
@@ -119,11 +151,14 @@ class Simulador:
         contador_dias = 0
         while pasandias:
             contador_dias += 1
-            contagios = self.contar_contagiados_comunidad()
             self.contar_dias_curarse(contador_dias)
+            self.contar_contagiados_comunidad()
             print(f"Dia {contador_dias}")
             self.contagio()
-            print(f"{contagios} casos activos de {len(self.comunidad.retorno_lista_comunidad())}")
+            print(f"{self.get_contagiados()} casos activos, {self.contador_susceptibles} susceptibles")
+            print(f"""{self.get_recuperados()} recuperados hasta la fecha, 
+{self.contador_muertos} fallecidos por la enfermedad""")
+
             # las personas de la comunidad disminuyen constantemente
             self.muereono()
             input()
