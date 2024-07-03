@@ -18,7 +18,13 @@ class Simulador:
         self.contador_muertos = 0
         self.contador_susceptibles = 0 
         self.contador_contagiados = 0
+        self.contador_dias = 0
 
+        self.comunidad_promedio_fisico = self.comunidad.get_promedio_fisico()
+        self.comunidad_probabilidad_estrecho = self.comunidad.get_probabilidad_contacto_estrecho()
+        self.probabilidad_enfermo = self.enfermedad.get_probabilidad()
+
+        ### variables a mostrar
     def get_contagiados(self):
         return self.contador_contagiados
     
@@ -41,10 +47,7 @@ class Simulador:
         miembros_comunidad = random.randint(1000,10000)
         self.comunidad.set_probabilidad_contacto_estrecho()
         self.comunidad.set_promedio_contacto_fisico()
-
         ident = 0
-        print(f"""Promedio de contacto fisico de la comunidad: {self.comunidad.get_promedio_fisico()} personas \n
-    Probabilidad de que un contacto fisico no familiar sea estrecho: {self.comunidad.get_probabilidad_contacto_estrecho()}% """)
 
         for i in range(miembros_comunidad):
             # a corresponde al nombre aleatorio del archivo
@@ -67,6 +70,7 @@ class Simulador:
                 ciudadano.set_contagiado(False)
             #se agrega a la lista de ciudadanos en la comunidad
             self.comunidad.agregar_persona_comunidad(ciudadano)
+            self.comunidad.add_enfermedad(self.enfermedad)
 
     def muereono(self):
         for i in self.comunidad.retorno_lista_comunidad():
@@ -100,8 +104,7 @@ class Simulador:
         # cuenta los dias que lleva la persona
         # si el estado de contagio es True
         lista_ciudadanos_comunidad = self.comunidad.retorno_lista_comunidad()
-        enfermedad = self.comunidad.get_enfermedad()
-        dias_max = enfermedad.get_tiempo_infectado()
+        dias_max = self.enfermedad.get_tiempo_infectado()
         self.contador_recuperados = 0
         for i in lista_ciudadanos_comunidad:
             if i.get_contagiado() == True:
@@ -143,22 +146,14 @@ class Simulador:
 
     #def guarda_en_archivo(): #overwrite o agregar linea?
 
-
     def dias(self):
-        pasandias = True
-        self.crea_comunidad()
-        self.comunidad.add_enfermedad(self.enfermedad)
-        contador_dias = 0
-        while pasandias:
-            contador_dias += 1
-            self.contar_dias_curarse(contador_dias)
-            self.contar_contagiados_comunidad()
-            print(f"Dia {contador_dias}")
-            self.contagio()
-            print(f"{self.get_contagiados()} casos activos, {self.contador_susceptibles} susceptibles")
-            print(f"""{self.get_recuperados()} recuperados hasta la fecha, 
-{self.contador_muertos} fallecidos por la enfermedad""")
+        self.contador_dias += 1
+        print(self.contador_dias)
+        self.contar_dias_curarse(self.contador_dias)
+        self.contar_contagiados_comunidad()
+        self.texto_dia = self.contador_dias
+        self.contagio()
 
             # las personas de la comunidad disminuyen constantemente
-            self.muereono()
-            input()
+        self.muereono()
+        

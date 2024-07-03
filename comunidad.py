@@ -9,8 +9,8 @@ class Comunidad:
         self.num_contagiados = 0
         self.__enfermedad = None
         # personas que conoce en promedio
-        self.__promedio_fisico = int
-        self.__probabilidad_contacto_estrecho = int
+        self.__promedio_fisico = 0
+        self.__probabilidad_contacto_estrecho = 0
 
     def add_enfermedad(self, enfermedad):
         if isinstance(enfermedad, Enfermedad):
