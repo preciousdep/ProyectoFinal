@@ -6,25 +6,19 @@ import pandas as pd
 import numpy as np
 
 
-
 class Simulador:
     def __init__(self):
-        #asegurarse que no hayan familias de mas de 3 personas
         self.comunidad = Comunidad()
-        self.enfermedad = Enfermedad("influenza",20,5)
+        self.enfermedad = Enfermedad("influenza", 20, 5)
         self.__contador_recuperados = 0
         self.__contador_muertos = 0
-        self.__contador_susceptibles = 0 
+        self.__contador_susceptibles = 0
         self.__contador_contagiados = 0
         self.__contador_dias = 0
-        self.dias_max = self.enfermedad.get_tiempo_infectado()
+        self.__dias_max = self.enfermedad.get_tiempo_infectado()
+        self.lista_ciudadanos_comunidad = len(
+            self.comunidad.retorno_lista_comunidad())
 
-        self.lista_ciudadanos_comunidad = len(self.comunidad.retorno_lista_comunidad())
-
-        ### variables a mostrar
-        self.comunidad_promedio_fisico = self.comunidad.get_promedio_fisico()
-        self.comunidad_probabilidad_estrecho = self.comunidad.get_probabilidad_contacto_estrecho()
-        self.probabilidad_enfermo = self.enfermedad.get_probabilidad()
         self.tasa_recuperacion = 0
 
     # getters y setters
@@ -33,7 +27,7 @@ class Simulador:
 
     def get_contagiados(self):
         return self.__contador_contagiados
-    
+
     def get_recuperados(self):
         return self.__contador_recuperados
 
@@ -44,27 +38,29 @@ class Simulador:
         return self.__contador_dias
 
     def contar_dias(self):
-        self.__contador_dias +=1
+        self.__contador_dias += 1
 
+    def get_dias_max_enfermedad(self):
+        return self.__dias_max
 
-    # funcion para que no se repitan mucho los apellidos
-    def check_apellido(self,apellido):
+    # asegurarse que no hayan familias de mas de 3 personas
+    def check_apellido(self, apellido):
         lista_ciudadanos_comunidad = self.comunidad.retorno_lista_comunidad()
         contador_apellido = 0
         for i in lista_ciudadanos_comunidad:
             if i.get_apellido() == apellido:
                 contador_apellido += 1
                 return False
-            elif contador_apellido == 3: 
-                return True 
-        
+            elif contador_apellido == 3:
+                return True
+
     # se crea el objeto comunidad y la lista de personas que pertenecen a ella
     # junto con la enfermedad que corresponde
     def crea_comunidad(self):
         datos = pd.read_csv('nombres.csv')
         nombres = pd.DataFrame(datos)
         ###############
-        miembros_comunidad = random.randint(5000,10000)
+        miembros_comunidad = random.randint(5000, 10000)
         self.comunidad.set_probabilidad_contacto_estrecho()
         self.comunidad.set_promedio_contacto_fisico()
         ident = 0
@@ -72,16 +68,16 @@ class Simulador:
         for i in range(miembros_comunidad):
             # a corresponde al nombre aleatorio del archivo
             # y p al apellido
-            a = random.randint(0,299)
-            p = random.randint(0,299)
+            a = random.randint(0, 299)
+            p = random.randint(0, 299)
             # draft infectados iniciales
-            infectado = random.randint(0,1000)
+            infectado = random.randint(0, 1000)
             ident += 1
-            nombre_ciudadano = nombres.iloc[a,0]
-            apellido_ciudadano = nombres.iloc[p,1]
+            nombre_ciudadano = nombres.iloc[a, 0]
+            apellido_ciudadano = nombres.iloc[p, 1]
             while self.check_apellido(apellido_ciudadano):
-                apellido_ciudadano = nombres.iloc[p+1,1]
-            ciudadano = Persona(ident,nombre_ciudadano,apellido_ciudadano)
+                apellido_ciudadano = nombres.iloc[p+1, 1]
+            ciudadano = Persona(ident, nombre_ciudadano, apellido_ciudadano)
             # probabilidad del 1% de que ciudadano sea contagio inicial
             if infectado == 1:
                 ciudadano.set_contagiado(True)
@@ -89,11 +85,11 @@ class Simulador:
             else:
                 ciudadano.set_contagiado(False)
                 ciudadano.set_sir(0)
-            #se agrega a la lista de ciudadanos en la comunidad
-            self.lista_ciudadanos_comunidad = len(self.comunidad.retorno_lista_comunidad())
+            # se agrega a la lista de ciudadanos en la comunidad
+            self.lista_ciudadanos_comunidad = len(
+                self.comunidad.retorno_lista_comunidad())
             self.comunidad.agregar_persona_comunidad(ciudadano)
             self.comunidad.add_enfermedad(self.enfermedad)
-
 
     # en caso de que la persona muera
     # estando enfermo, se elimina de la lista
@@ -101,13 +97,12 @@ class Simulador:
     # __contador_muertos
     def muereono(self):
         for i in self.comunidad.retorno_lista_comunidad():
-            if i.get_contagiado() == True :
-                a = random.randint(0,100)
+            if i.get_contagiado():
+                a = random.randint(0, 100)
                 if a <= 2:
                     self.comunidad.persona_muere(i)
                     self.__contador_muertos += 1
 
-    
     # esta funciona para un conteo diario
     # de cada grupo del sir
     def contar_contagiados_comunidad(self):
@@ -132,12 +127,13 @@ class Simulador:
         # cuenta los dias que lleva la persona
         # si el estado de contagio es True
         for i in self.comunidad.retorno_lista_comunidad():
-            if i.get_dias_enfermo() >= self.dias_max and i.get_contagiado():
+            if i.get_dias_enfermo() >= self.get_dias_max_enfermedad() and [
+             i.get_contagiado()]:
                 i.set_contagiado(False)
                 i.set_sir(2)
-            if i.get_contagiado() and i.get_dias_enfermo() <= self.dias_max:
+            if i.get_contagiado() and i.get_dias_enfermo() <= [
+             self.get_dias_max_enfermedad()]:
                 i.contar_dias_enfermo()
-
 
     # mecanismo de contagio aleatorio:
     # la persona interactua con una cantidad aproximada de personas
@@ -148,35 +144,41 @@ class Simulador:
         # pasa por la lista y evalua los contactos de cada
         # persona uno por uno
         for i in lista:
-            contactos_dia = random.randint(self.comunidad.get_promedio_fisico()-1, 
-                            self.comunidad.get_promedio_fisico()+1)
+            contactos_dia = random.randint(
+                self.comunidad.get_promedio_fisico()-1,
+                self.comunidad.get_promedio_fisico()+1)
             # si la persona esta contagiada
             if i.get_contagiado():
-                # aqui se evalua si el contacto es estrecho o no, de ahi se llama
+                # aqui se evalua si el contacto es estrecho o no, de ahi llama
                 # a la funcion que toma la tasa de contagio (en enfermedad)
                 # para ver si se contagia o no la otra persona
                 estrecho = self.comunidad.get_probabilidad_contacto_estrecho()
-                for j in range(0,contactos_dia):
-                    persona_x = random.randint(0,len(lista)-1)
-                    decidir_contagio = random.randint(0,100)
-                    persona2 = self.comunidad.retorno_lista_comunidad()[persona_x]
+                for j in range(0, contactos_dia):
+                    persona_x = random.randint(0, len(lista)-1)
+                    decidir_contagio = random.randint(0, 100)
+                    persona2 = self.comunidad.retorno_lista_comunidad()[
+                        persona_x]
                     if persona2.get_sir() == 0:
                         # contacto fisico a estrecho por ser familia 100%
                         if i.get_apellido() == persona2.get_apellido():
                             valor = self.enfermedad.infeccion()
                             if valor:
-                                self.comunidad.retorno_lista_comunidad()[persona_x].set_contagiado(valor)
-                                self.comunidad.retorno_lista_comunidad()[persona_x].set_sir(1) 
+                                self.comunidad.retorno_lista_comunidad()[
+                                    persona_x].set_contagiado(valor)
+                                self.comunidad.retorno_lista_comunidad()[
+                                    persona_x].set_sir(1)
                         # esto si el contacto fisico es estrecho o no
                         elif decidir_contagio < estrecho:
                             valor = self.enfermedad.infeccion()
                             if valor:
-                                self.comunidad.retorno_lista_comunidad()[persona_x].set_contagiado(valor)
-                                self.comunidad.retorno_lista_comunidad()[persona_x].set_sir(1)
+                                self.comunidad.retorno_lista_comunidad()[
+                                    persona_x].set_contagiado(valor)
+                                self.comunidad.retorno_lista_comunidad()[
+                                    persona_x].set_sir(1)
 
     # se guarda la lista de 'arreglo' para luego
     # almacenarla en un arreglo numpy y asi poder hacer
     # el plot
-    def guardar_en_numpy(self,arreglo):
+    def guardar_en_numpy(self, arreglo):
         lista = np.array(arreglo)
         return lista

@@ -1,9 +1,10 @@
 import random
 
+
 class Enfermedad:
-    def __init__(self,nombre,probabilidad,tiempo):
+    def __init__(self, nombre, probabilidad, tiempo):
         self.__nombreenfermedad = nombre
-        #en entero de 0 a 100 para poder trabajarlo
+        # en entero de 0 a 100 para poder trabajarlo
         self.__probabilidad = probabilidad
         self.__tiempo_infectado = tiempo
         self.__contador = 0
@@ -19,10 +20,10 @@ class Enfermedad:
 
     def get_contador(self):
         return self.__contador
-    
+
     # se va a llamar a la funcion por cada paso para contar
     # los dias de enfermo
-        
+
     def contador_enfermo(self):
         self.__contador += 1
 
@@ -31,11 +32,10 @@ class Enfermedad:
     # considerar: recupera, inmune. muere, eliminar?? vacuna, posibilidad 100%
 
     def infeccion(self):
-        #intervalo
+        # intervalo
         prob = self.get_probabilidad()
-        x = random.randint(0,100)
+        x = random.randint(0, 100)
         if x <= prob:
             return True
         else:
             return False
-
