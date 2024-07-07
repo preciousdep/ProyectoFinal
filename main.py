@@ -2,6 +2,9 @@ from simulador import Simulador
 import gi
 gi.require_version("Gtk", "4.0")
 from gi.repository import Gtk, GLib, Gio
+import matplotlib
+import matplotlib.pyplot as plt
+plt.switch_backend('tkagg')
 
 # clase ventana
 
@@ -9,11 +12,15 @@ class MainWindow(Gtk.Window):
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
 
+
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.set_child(vbox)
 
-        self.label_info_comunidad = Gtk.Label(label=f"Probabilidad de contacto estrecho: {simulador.comunidad_probabilidad_estrecho}")
-        vbox.append(self.label_info_comunidad)
+        self.label_pasos = Gtk.Label(label="Dia: 1")
+        vbox.append(self.label_pasos)
+
+        self.label_total_personas = Gtk.Label(label= f"Personas total de comunidad: {simulador.lista_ciudadanos_comunidad}")
+        vbox.append(self.label_total_personas)
 
         self.label_susceptibles = Gtk.Label(label=f"Susceptibles: {simulador.contador_susceptibles}")
         vbox.append(self.label_susceptibles)
@@ -27,17 +34,69 @@ class MainWindow(Gtk.Window):
         self.label_muertos = Gtk.Label(label=f"Muertos: {simulador.contador_muertos}")
         vbox.append(self.label_muertos)
 
+        self.label_tasa_contagio = Gtk.Label(label=f"Tasa de contagio: {simulador.enfermedad.get_probabilidad()}")
+        vbox.append(self.label_tasa_contagio)
+
+        self.label_tasa_recuperacion = Gtk.Label(label=f"Tasa de recuperacion: {simulador.tasa_recuperacion}")
+        vbox.append(self.label_tasa_recuperacion)
+
         self.button = Gtk.Button(label="Pasar dia")
         self.button.connect("clicked", self.on_button_clicked)
         vbox.append(self.button)
 
+        self.boton_grafico = Gtk.Button(label="Mostrar Grafico")
+        self.boton_grafico.connect("clicked", self.boton_grafico_mostrar)
+        vbox.append(self.boton_grafico)
+
+        self.arreglo_datos = []
+
+    def boton_grafico_mostrar(self,widget):
+        lista_np = simulador.guardar_en_numpy(self.arreglo_datos)
+        dias = lista_np[:, 0]
+        susceptibles = lista_np[:, 1]
+        infectados = lista_np[:, 2]
+        recuperados = lista_np[:, 3]
+
+        fig = plt.figure()
+        ax = fig.subplots()
+
+        ax.plot(dias, susceptibles, label='Susceptibles', marker='o')
+        ax.plot(dias, infectados, label='Infectados', marker='s')
+        ax.plot(dias, recuperados, label='Recuperados', marker='^')
+
+        ax.set_xlabel('Dias')
+        ax.set_ylabel('Poblacion')
+        ax.set_title('Simulador de contagio')
+        ax.legend()
+        ax.grid(True)
+
+        plt.show()
+
+        
     def on_button_clicked(self, widget):
-        simulador.dias()
-        self.label_info_comunidad.set_text(f"Paso {simulador.texto_dia} dia/s")
+        simulador.contador_dias += 1
+        simulador.contagio()
+        print(simulador.contador_dias)
+        simulador.contar_dias_curarse()
+        simulador.contar_contagiados_comunidad()
+        simulador.muereono()
+
+        if simulador.contador_contagiados != 0:
+            simulador.tasa_recuperacion = simulador.contador_recuperados / simulador.contador_contagiados
+        else:
+            simulador.tasa_recuperacion = 0
+
+        self.label_pasos.set_text(f"Dia: {simulador.texto_dia}")
+        self.label_total_personas.set_text(f"Personas total de comunidad: {simulador.lista_ciudadanos_comunidad}")
         self.label_susceptibles.set_text(f"Susceptibles: {simulador.contador_susceptibles}")
         self.label_contagiados.set_text(f"Contagiados: {simulador.contador_contagiados}")
         self.label_recuperados.set_text(f"Recuperados: {simulador.contador_recuperados}")
         self.label_muertos.set_text(f"Muertos: {simulador.contador_muertos}")
+        self.label_tasa_recuperacion.set_text(f"Tasa de recuperacion: {simulador.tasa_recuperacion}")
+        self.label_tasa_contagio.set_text(f"Tasa de contagio: {simulador.enfermedad.get_probabilidad()}")
+        # crear arreglo para guardarlo despues
+        self.arreglo_datos.append([simulador.contador_dias, simulador.contador_susceptibles, simulador.contador_contagiados, simulador.contador_recuperados])
+ 
 
 
 # clase aplicacion
@@ -63,5 +122,6 @@ if __name__ == "__main__":
     app = App()
     simulador = Simulador()
     simulador.crea_comunidad()
+    simulador.dias()
     app.run(None)
 

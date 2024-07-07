@@ -3,6 +3,8 @@ from comunidad import Comunidad
 from enfermedad import Enfermedad
 import random
 import pandas as pd
+import numpy as np
+#idea: guardar todos los dias en una lista de numpy
 
     # prueba de simulador para interactuar con las clases
     # draft crea una comunidad para controlar el manejo del contagio
@@ -13,7 +15,7 @@ class Simulador:
     def __init__(self):
         #asegurarse que no hayan familias de mas de 3 personas
         self.comunidad = Comunidad()
-        self.enfermedad = Enfermedad("influenza",20,4)
+        self.enfermedad = Enfermedad("influenza",20,5)
         self.contador_recuperados = 0
         self.contador_muertos = 0
         self.contador_susceptibles = 0 
@@ -26,6 +28,7 @@ class Simulador:
         self.comunidad_promedio_fisico = self.comunidad.get_promedio_fisico()
         self.comunidad_probabilidad_estrecho = self.comunidad.get_probabilidad_contacto_estrecho()
         self.probabilidad_enfermo = self.enfermedad.get_probabilidad()
+        self.tasa_recuperacion = 0
 
         ### variables a mostrar
     def get_contagiados(self):
@@ -147,14 +150,12 @@ class Simulador:
                                 self.comunidad.retorno_lista_comunidad()[persona_x].set_contagiado(valor)
                                 self.comunidad.retorno_lista_comunidad()[persona_x].set_sir(1)
  
-
-    #def guarda_en_archivo(): #overwrite o agregar linea?
+    def guardar_en_numpy(self,arreglo):
+        lista = np.array(arreglo)
+        return lista
 
     def dias(self):
         self.contador_dias += 1
         print(self.contador_dias)
         self.contar_dias_curarse()
         self.texto_dia = self.contador_dias
-        self.contagio()
-        self.muereono()
-        self.contar_contagiados_comunidad()
