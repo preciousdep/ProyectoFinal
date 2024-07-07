@@ -22,16 +22,16 @@ class MainWindow(Gtk.Window):
         self.label_total_personas = Gtk.Label(label= f"Personas total de comunidad: {simulador.lista_ciudadanos_comunidad}")
         vbox.append(self.label_total_personas)
 
-        self.label_susceptibles = Gtk.Label(label=f"Susceptibles: {simulador.contador_susceptibles}")
+        self.label_susceptibles = Gtk.Label(label=f"Susceptibles: {simulador.get_susceptibles()}")
         vbox.append(self.label_susceptibles)
 
-        self.label_contagiados = Gtk.Label(label=f"Contagiados: {simulador.contador_contagiados}")
+        self.label_contagiados = Gtk.Label(label=f"Contagiados: {simulador.get_contagiados()}")
         vbox.append(self.label_contagiados)
 
-        self.label_recuperados = Gtk.Label(label=f"Recuperados: {simulador.contador_recuperados}")
+        self.label_recuperados = Gtk.Label(label=f"Recuperados: {simulador.get_recuperados()}")
         vbox.append(self.label_recuperados)
 
-        self.label_muertos = Gtk.Label(label=f"Muertos: {simulador.contador_muertos}")
+        self.label_muertos = Gtk.Label(label=f"Muertos: {simulador.get_muertos()}")
         vbox.append(self.label_muertos)
 
         self.label_tasa_contagio = Gtk.Label(label=f"Tasa de contagio: {simulador.enfermedad.get_probabilidad()}")
@@ -74,28 +74,28 @@ class MainWindow(Gtk.Window):
 
         
     def on_button_clicked(self, widget):
-        simulador.contador_dias += 1
+        simulador.contar_dias()
         simulador.contagio()
-        print(simulador.contador_dias)
+        print(simulador.get_contador_dias())
         simulador.contar_dias_curarse()
         simulador.contar_contagiados_comunidad()
         simulador.muereono()
 
-        if simulador.contador_contagiados != 0:
-            simulador.tasa_recuperacion = simulador.contador_recuperados / simulador.contador_contagiados
+        if simulador.get_contagiados() != 0:
+            simulador.tasa_recuperacion = simulador.get_recuperados() / simulador.get_contagiados()
         else:
             simulador.tasa_recuperacion = 0
 
-        self.label_pasos.set_text(f"Dia: {simulador.texto_dia}")
+        self.label_pasos.set_text(f"Dia: {simulador.get_contador_dias()}")
         self.label_total_personas.set_text(f"Personas total de comunidad: {simulador.lista_ciudadanos_comunidad}")
-        self.label_susceptibles.set_text(f"Susceptibles: {simulador.contador_susceptibles}")
-        self.label_contagiados.set_text(f"Contagiados: {simulador.contador_contagiados}")
-        self.label_recuperados.set_text(f"Recuperados: {simulador.contador_recuperados}")
-        self.label_muertos.set_text(f"Muertos: {simulador.contador_muertos}")
+        self.label_susceptibles.set_text(f"Susceptibles: {simulador.get_susceptibles()}")
+        self.label_contagiados.set_text(f"Contagiados: {simulador.get_contagiados()}")
+        self.label_recuperados.set_text(f"Recuperados: {simulador.get_recuperados()}")
+        self.label_muertos.set_text(f"Muertos: {simulador.get_muertos()}")
         self.label_tasa_recuperacion.set_text(f"Tasa de recuperacion: {simulador.tasa_recuperacion}")
         self.label_tasa_contagio.set_text(f"Tasa de contagio: {simulador.enfermedad.get_probabilidad()}")
         # crear arreglo para guardarlo despues
-        self.arreglo_datos.append([simulador.contador_dias, simulador.contador_susceptibles, simulador.contador_contagiados, simulador.contador_recuperados])
+        self.arreglo_datos.append([simulador.get_contador_dias(), simulador.get_susceptibles(), simulador.get_contagiados(), simulador.get_recuperados()])
  
 
 
@@ -122,6 +122,5 @@ if __name__ == "__main__":
     app = App()
     simulador = Simulador()
     simulador.crea_comunidad()
-    simulador.dias()
     app.run(None)
 
