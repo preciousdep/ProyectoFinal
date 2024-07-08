@@ -41,9 +41,9 @@ class Comunidad:
 
 # se refiere al promedio de 'conocidos' o 'amigos'
 # que tiene una persona. se considerara un
-# +- 1 personas para ese caso
+# +- 2 personas para ese caso
     def set_promedio_contacto_fisico(self):
-        self.__promedio_fisico = random.randint(2, 10)
+        self.__promedio_fisico = random.randint(3, 10)
 
 # que un contacto fisico cualquiera con un conocido o amigo
 # sea estrecho y posibilita un contagio. de lo contrario,

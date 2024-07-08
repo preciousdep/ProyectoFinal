@@ -1,18 +1,52 @@
-from gi.repository import Gtk
-import matplotlib.pyplot as plt
-from simulador import Simulador
 import gi
 gi.require_version("Gtk", "4.0")
+from gi.repository import Gtk, Gio, GObject, GLib
+import matplotlib.pyplot as plt
+from simulador import Simulador
 plt.switch_backend('tkagg')
 
 
+def on_quit_action(self, _action):
+    quit()
+
+
 # clase ventana
-class MainWindow(Gtk.Window):
+class MainWindow(Gtk.ApplicationWindow):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.set_child(vbox)
+
+        header_bar = Gtk.HeaderBar.new()
+        self.set_titlebar(titlebar=header_bar)
+        self.set_title("Simulador de epidemia")
+
+        # Listado del menu
+        menu = Gio.Menu.new()
+
+        # Create a popover
+        self.popover = Gtk.PopoverMenu()
+        self.popover.set_menu_model(menu)
+
+        # crea un menu
+        self.menu_popover = Gtk.MenuButton()
+        self.menu_popover.set_popover(self.popover)
+        self.menu_popover.set_icon_name("open-menu-symbolic")
+
+        # agrega headerbar el menu popover
+        header_bar.pack_end(self.menu_popover)
+
+        # Add an about dialog
+        about_menu = Gio.SimpleAction.new("about", None)
+        about_menu.connect("activate", self.show_about_dialog)
+        self.add_action(about_menu)
+        menu.append("Acerca de", "win.about")
+
+        action = Gio.SimpleAction.new("quit", None)
+        action.connect("activate", on_quit_action)
+        self.add_action(action)
+        menu.append("Salir", "win.quit")
 
         self.label_pasos = Gtk.Label(label="Dia: 1")
         vbox.append(self.label_pasos)
@@ -38,11 +72,11 @@ class MainWindow(Gtk.Window):
         vbox.append(self.label_muertos)
 
         self.label_tasa_contagio = Gtk.Label(
-            label=f"Tasa de contagio: {simulador.enfermedad.get_probabilidad()}")
+            label=f"Tasa de contagio: {simulador.enfermedad.get_probabilidad()}%")
         vbox.append(self.label_tasa_contagio)
 
         self.label_tasa_recuperacion = Gtk.Label(
-            label=f"Tasa de recuperacion: {simulador.tasa_recuperacion}")
+            label=f"Tasa de recuperacion: {simulador.get_dias_max_enfermedad()} dias")
         vbox.append(self.label_tasa_recuperacion)
 
         self.button = Gtk.Button(label="Pasar dia")
@@ -57,6 +91,17 @@ class MainWindow(Gtk.Window):
         # para posteriormente guardarlos en un arreglo numpy y poder agregar
         # al grafico plot
         self.arreglo_datos = []
+
+    # detalles ventana
+    def show_about_dialog(self, action, param):
+        self.about = Gtk.AboutDialog()
+        self.about.set_transient_for(self)
+        self.about.set_modal(self)
+        self.about.set_authors(["Astrid"])
+        self.about.set_copyright("Copyright 2024 Astrid Leon")
+        self.about.set_license_type(Gtk.License.GPL_3_0)
+        self.about.set_version("1.0")
+        self.about.set_visible(True)
 
     # respuesta del boton para mostrar el grafico
     def boton_grafico_mostrar(self, widget):
@@ -84,15 +129,15 @@ class MainWindow(Gtk.Window):
     # pasa un dia de la simulacion
     def on_button_clicked(self, widget):
         simulador.contar_dias()
-        simulador.contagio()
-        print(simulador.get_contador_dias())
-        simulador.contar_dias_curarse()
         simulador.contar_contagiados_comunidad()
+        # los contagios ocurren luego del check inicial del dia
+        simulador.contagio()
+        simulador.contar_dias_curarse()
         simulador.muereono()
 
         if simulador.get_contagiados() != 0:
-            simulador.tasa_recuperacion = [
-             simulador.get_recuperados() / simulador.get_contagiados()]
+            simulador.tasa_recuperacion = (
+             simulador.get_recuperados() / simulador.get_contagiados())
         else:
             simulador.tasa_recuperacion = 0
         # se 'refrescan' todas las etiquetas mostradas
@@ -107,9 +152,9 @@ class MainWindow(Gtk.Window):
             f"Recuperados: {simulador.get_recuperados()}")
         self.label_muertos.set_text(f"Muertos: {simulador.get_muertos()}")
         self.label_tasa_recuperacion.set_text(
-            f"Tasa de recuperacion: {simulador.tasa_recuperacion}")
+            f"Tasa de recuperacion: {simulador.get_dias_max_enfermedad()} dias")
         self.label_tasa_contagio.set_text(
-            f"Tasa de contagio: {simulador.enfermedad.get_probabilidad()}")
+            f"Tasa de contagio: {simulador.enfermedad.get_probabilidad()}%")
         # se agregan los datos del dia al arreglo
         self.arreglo_datos.append(
             [simulador.get_contador_dias(), simulador.get_susceptibles(),
@@ -138,4 +183,6 @@ if __name__ == "__main__":
     app = App()
     simulador = Simulador()
     simulador.crea_comunidad()
+    simulador.contar_dias()
+    simulador.contar_contagiados_comunidad()
     app.run(None)
