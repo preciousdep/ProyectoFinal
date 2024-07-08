@@ -12,7 +12,7 @@ class Simulador:
         self.enfermedad = Enfermedad(
             # control aleatorio de tasa de contagio/dias recuperacion
             # si se escapa de esos valores, no funciona el modelo
-            "influenza", random.randint(10, 19), random.randint(2, 5))
+            "influenza", random.randint(10, 16), random.randint(2, 5))
         self.__contador_recuperados = 0
         self.__contador_muertos = 0
         self.__contador_susceptibles = 0
@@ -63,7 +63,7 @@ class Simulador:
         datos = pd.read_csv('nombres.csv')
         nombres = pd.DataFrame(datos)
         ###############
-        miembros_comunidad = random.randint(5000, 10000)
+        miembros_comunidad = random.randint(6000, 10000)
         # valores aleatorios controlados
         self.comunidad.set_probabilidad_contacto_estrecho()
         self.comunidad.set_promedio_contacto_fisico()
@@ -75,7 +75,7 @@ class Simulador:
             a = random.randint(0, 299)
             p = random.randint(0, 299)
             # draft infectados iniciales
-            infectado = random.randint(0, 1000)
+            infectado = random.randint(0, 600)
             ident += 1
             nombre_ciudadano = nombres.iloc[a, 0]
             apellido_ciudadano = nombres.iloc[p, 1]
