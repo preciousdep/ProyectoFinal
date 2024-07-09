@@ -135,11 +135,6 @@ class MainWindow(Gtk.ApplicationWindow):
         simulador.contar_dias_curarse()
         simulador.muereono()
 
-        if simulador.get_contagiados() != 0:
-            simulador.tasa_recuperacion = (
-             simulador.get_recuperados() / simulador.get_contagiados())
-        else:
-            simulador.tasa_recuperacion = 0
         # se 'refrescan' todas las etiquetas mostradas
         self.label_pasos.set_text(f"Dia: {simulador.get_contador_dias()}")
         self.label_total_personas.set_text(
